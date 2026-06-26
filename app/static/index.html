@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Task Manager</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', sans-serif; background: #1a1a2e; color: #eee; min-height: 100vh; display: flex; justify-content: center; padding: 40px 20px; }
+        .container { width: 100%; max-width: 600px; }
+        h1 { text-align: center; margin-bottom: 24px; font-size: 28px; color: #e94560; }
+        .input-group { display: flex; gap: 8px; margin-bottom: 20px; }
+        #task-input { flex: 1; padding: 12px 16px; border: 2px solid #333; border-radius: 8px; background: #16213e; color: #eee; font-size: 16px; outline: none; }
+        #task-input:focus { border-color: #e94560; }
+        #task-input::placeholder { color: #666; }
+        select { padding: 12px; border: 2px solid #333; border-radius: 8px; background: #16213e; color: #eee; font-size: 14px; cursor: pointer; }
+        button { padding: 12px 20px; border: none; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.2s; }
+        #add-btn { background: #e94560; color: #fff; }
+        #add-btn:hover { background: #c81e45; }
+        #add-btn:disabled { background: #555; cursor: not-allowed; }
+        .filters { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }
+        .filter-btn { padding: 8px 16px; border: 1px solid #333; border-radius: 20px; background: transparent; color: #aaa; font-size: 13px; }
+        .filter-btn.active { background: #e94560; color: #fff; border-color: #e94560; }
+        .stats { display: flex; gap: 16px; margin-bottom: 20px; text-align: center; }
+        .stat { flex: 1; padding: 12px; background: #16213e; border-radius: 8px; }
+        .stat-number { font-size: 24px; font-weight: 700; color: #e94560; }
+        .stat-label { font-size: 12px; color: #888; margin-top: 4px; }
+        .task-list { list-style: none; }
+        .task-item { display: flex; align-items: center; gap: 12px; padding: 14px 16px; background: #16213e; border-radius: 8px; margin-bottom: 8px; transition: all 0.2s; }
+        .task-item:hover { background: #1a2744; }
+        .task-item.completed .task-text { text-decoration: line-through; color: #555; }
+        .task-checkbox { width: 20px; height: 20px; cursor: pointer; accent-color: #e94560; }
+        .task-text { flex: 1; font-size: 15px; }
+        .task-priority { font-size: 11px; padding: 3px 8px; border-radius: 12px; font-weight: 600; text-transform: uppercase; }
+        .priority-alta { background: #e9456033; color: #e94560; }
+        .priority-media { background: #f5a62333; color: #f5a623; }
+        .priority-baixa { background: #2ecc7133; color: #2ecc71; }
+        .delete-btn { background: transparent; color: #555; border: none; font-size: 18px; padding: 4px 8px; border-radius: 4px; }
+        .delete-btn:hover { color: #e94560; background: #e9456022; }
+        .empty-state { text-align: center; padding: 40px; color: #555; font-size: 16px; }
+        #error-message { color: #e94560; font-size: 13px; margin-top: -12px; margin-bottom: 12px; display: none; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📋 Task Manager</h1>
+
+        <div class="input-group">
+            <input type="text" id="task-input" placeholder="Nova tarefa..." maxlength="100" autocomplete="off">
+            <select id="priority-select">
+                <option value="media">Média</option>
+                <option value="alta">Alta</option>
+                <option value="baixa">Baixa</option>
+            </select>
+            <button id="add-btn">Adicionar</button>
+        </div>
+        <div id="error-message"></div>
+
+        <div class="stats">
+            <div class="stat">
+                <div class="stat-number" id="total-count">0</div>
+                <div class="stat-label">Total</div>
+            </div>
+            <div class="stat">
+                <div class="stat-number" id="active-count">0</div>
+                <div class="stat-label">Ativas</div>
+            </div>
+            <div class="stat">
+                <div class="stat-number" id="completed-count">0</div>
+                <div class="stat-label">Concluídas</div>
+            </div>
+        </div>
+
+        <div class="filters">
+            <button class="filter-btn active" data-filter="all">Todas</button>
+            <button class="filter-btn" data-filter="active">Ativas</button>
+            <button class="filter-btn" data-filter="completed">Concluídas</button>
+        </div>
+
+        <ul class="task-list" id="task-list"></ul>
+    </div>
+
+    <script>
+        let tasks = [];
+        let currentFilter = 'all';
+
+        const input = document.getElementById('task-input');
+        const addBtn = document.getElementById('add-btn');
+        const taskList = document.getElementById('task-list');
+        const errorMsg = document.getElementById('error-message');
+        const prioritySelect = document.getElementById('priority-select');
+
+        function showError(msg) {
+            errorMsg.textContent = msg;
+            errorMsg.style.display = 'block';
+            setTimeout(() => { errorMsg.style.display = 'none'; }, 3000);
+        }
+
+        function addTask() {
+            const title = input.value.trim();
+            if (!title) { showError('O título é obrigatório.'); return; }
+            if (title.length < 3) { showError('O título deve ter pelo menos 3 caracteres.'); return; }
+
+            tasks.push({
+                id: Date.now(),
+                title,
+                priority: prioritySelect.value,
+                completed: false,
+            });
+
+            input.value = '';
+            render();
+        }
+
+        function toggleTask(id) {
+            const task = tasks.find(t => t.id === id);
+            if (task) task.completed = !task.completed;
+            render();
+        }
+
+        function deleteTask(id) {
+            tasks = tasks.filter(t => t.id !== id);
+            render();
+        }
+
+        function setFilter(filter) {
+            currentFilter = filter;
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.filter === filter);
+            });
+            render();
+        }
+
+        function render() {
+            const filtered = tasks.filter(t => {
+                if (currentFilter === 'active') return !t.completed;
+                if (currentFilter === 'completed') return t.completed;
+                return true;
+            });
+
+            document.getElementById('total-count').textContent = tasks.length;
+            document.getElementById('active-count').textContent = tasks.filter(t => !t.completed).length;
+            document.getElementById('completed-count').textContent = tasks.filter(t => t.completed).length;
+
+            if (filtered.length === 0) {
+                taskList.innerHTML = '<div class="empty-state">Nenhuma tarefa encontrada.</div>';
+                return;
+            }
+
+            taskList.innerHTML = filtered.map(t => `
+                <li class="task-item ${t.completed ? 'completed' : ''}" data-id="${t.id}">
+                    <input type="checkbox" class="task-checkbox" ${t.completed ? 'checked' : ''} onchange="toggleTask(${t.id})">
+                    <span class="task-text">${t.title}</span>
+                    <span class="task-priority priority-${t.priority}">${t.priority}</span>
+                    <button class="delete-btn" onclick="deleteTask(${t.id})" title="Deletar">✕</button>
+                </li>
+            `).join('');
+        }
+
+        addBtn.addEventListener('click', addTask);
+        input.addEventListener('keypress', e => { if (e.key === 'Enter') addTask(); });
+        document.querySelectorAll('.filter-btn').forEach(btn => {
+            btn.addEventListener('click', () => setFilter(btn.dataset.filter));
+        });
+
+        render();
+    </script>
+</body>
+</html>
