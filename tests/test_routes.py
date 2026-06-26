@@ -277,3 +277,16 @@ class TestCRUDFlow:
         # 7. CONFIRMAR DELEÇÃO
         response = client.get(f"/api/tasks/{task_id}")
         assert response.status_code == 404
+
+
+class TestStaticRoutes:
+    """Testes para rotas estáticas (Frontend)."""
+
+    @pytest.mark.integration
+    def test_serve_index_html(self, client):
+        """O root URL (/) deve servir o index.html (200)."""
+        response = client.get("/")
+        assert response.status_code == 200
+        assert b"<!DOCTYPE html>" in response.data
+        assert b"Task Manager" in response.data
+

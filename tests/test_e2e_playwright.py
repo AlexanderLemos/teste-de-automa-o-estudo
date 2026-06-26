@@ -15,13 +15,17 @@ Tipos de teste:
 """
 
 import re
+from pathlib import Path
 
 import pytest
 from playwright.sync_api import Page, expect
 
 
-# URL da página (arquivo local)
-PAGE_URL = "file:///C:/Users/AlexanderSL/.gemini/antigravity/scratch/web-task-manager/app/static/index.html"
+# URL da página (caminho local dinâmico e portátil)
+BASE_DIR = Path(__file__).parent.parent
+HTML_FILE_PATH = BASE_DIR / "app" / "static" / "index.html"
+PAGE_URL = HTML_FILE_PATH.as_uri()
+
 
 
 # =====================================================================

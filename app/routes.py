@@ -18,6 +18,14 @@ from . import get_db
 bp = Blueprint("tasks", __name__)
 
 
+@bp.route("/", methods=["GET"])
+def index():
+    """Serve a página principal (Single Page Application)."""
+    import os
+    from flask import current_app, send_from_directory
+    return send_from_directory(os.path.join(current_app.root_path, "static"), "index.html")
+
+
 def get_repo():
     """Obtém instância do repositório de tarefas."""
     return TaskRepository(get_db())
