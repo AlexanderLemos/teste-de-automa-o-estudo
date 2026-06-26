@@ -1,4 +1,4 @@
-# 🧪 Web Task Manager — Projeto de Testes com pytest
+ Web Task Manager — Projeto de Testes com pytest
 
 Projeto de demonstração de **testes automatizados** para uma aplicação web RESTful, utilizando **Python**, **Flask** e **pytest**.
 
@@ -6,7 +6,7 @@ Projeto de demonstração de **testes automatizados** para uma aplicação web R
 
 ---
 
-## 🏗️ Tecnologias
+##  Tecnologias
 
 | Tecnologia | Uso |
 |------------|-----|
@@ -18,7 +18,7 @@ Projeto de demonstração de **testes automatizados** para uma aplicação web R
 
 ---
 
-## 📁 Estrutura do Projeto
+##  Estrutura do Projeto
 
 ```
 web-task-manager/
@@ -40,7 +40,7 @@ web-task-manager/
 
 ---
 
-## 🚀 Como Rodar
+## Como Rodar
 
 ```bash
 # 1. Instalar dependências
@@ -58,7 +58,7 @@ pytest --cov=app --cov-report=term-missing
 
 ---
 
-## 📋 Endpoints da API
+##  Endpoints da API
 
 | Método | Rota | Descrição |
 |--------|------|-----------|
@@ -71,7 +71,7 @@ pytest --cov=app --cov-report=term-missing
 
 ---
 
-## ✅ Tipos de Testes Implementados
+## Tipos de Testes Implementados
 
 - **Testes Unitários**: Validação de modelos e funções isoladas
 - **Testes de Integração**: Validação dos endpoints da API completa
@@ -81,7 +81,7 @@ pytest --cov=app --cov-report=term-missing
 
 ---
 
-## 👤 Autor
+## Autor
 
 **Alexander Souza de Lemos**
 Engenharia de Software — FAMETRO (5º período)
